@@ -1,0 +1,8 @@
+POST http://localhost:3001/api/notes
+Content-Type: application/json        
+// Do not add blank space above this line coz REST Client will take this as empty header and it will NOT know that the data it received is in JSON format.
+
+{
+  "content": "My name is Althea Mae",
+  "important": true
+}
