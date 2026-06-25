@@ -1,10 +1,8 @@
 const { log } = require('console')
 const express = require('express')
 const app = express()
-app.use(express.json())  // Activates a built-in Express middleware called a JSON parser.
-const cors = require('cors')
-app.use(cors())
 const morgan = require('morgan')
+const cors = require('cors')
 
 // Define a custom token to capture POST body data
 morgan.token('body', (req, res) => {
@@ -14,11 +12,17 @@ morgan.token('body', (req, res) => {
 // Use the tiny configuration and append the custom body token
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
+// Security & Assets
+app.use(cors())
+app.use(express.static('dist'))
+
 let notes = [
   { id: '1', content: 'HTML is easy', important: true },
   { id: '2', content: 'Browser can execute only JavaScript', important: false},
   { id: '3', content: 'GET and POST are the most important methods of HTTP protocol', important: true }
 ]
+
+app.use(express.json())  // Activates a built-in Express middleware called a JSON parser.
 
 app.get('/api/notes', (request, response) => {
   response.json(notes)
