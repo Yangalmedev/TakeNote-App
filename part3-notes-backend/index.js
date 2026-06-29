@@ -41,14 +41,9 @@ app.get('/api/notes', (request, response) => {
 })
 
 app.get('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  const note = notes.find((note) => note.id === id)
-
-  if (note) {
+  Note.findById(request.params.id).then(note => {
     response.json(note)
-  } else {
-    response.status(404).end()
-  }
+  })
 })
 
 const generateId = () => {
@@ -67,16 +62,21 @@ app.post('/api/notes/', (request, response) => {
     })
   }
 
-  const note = {
+  // The note objects are created with the Note constructor function.
+  const note = new Note({
     content: body.content,
     important: body.important || false,
     id: generateId()
-  }
+  })
 
   notes.concat(note)
   log(note)
   response.json(note)
   log('Request Headers: ', request.headers);
+
+  note.save().then(savedNote => {
+    response.json(savedNote)
+  })
 })
 
 app.delete('/api/notes/:id', (request, response) => {
