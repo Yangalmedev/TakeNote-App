@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const mongoose = require('mongoose')
+const Note = require('./models/note')
 
 // Define a custom token to capture POST body data
 morgan.token('body', (req, res) => {
