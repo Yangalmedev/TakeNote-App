@@ -1,3 +1,5 @@
+// THIS FILE IS FOR CONNECTING MONGODB_ATLAS DATABASE
+
 const mongoose = require('mongoose')
 
 if (process.argv.length < 3) {
@@ -8,11 +10,10 @@ if (process.argv.length < 3) {
 const password = process.argv[2]
 const content = process.argv[3]
 const important = process.argv[4]
-const url = `mongodb+srv://yangalmedev:${password}@cluster0.yte5q44.mongodb.net/noteApp?appName=Cluster0`
+const uri = `mongodb+srv://yangalmedev:${password}@cluster0.yte5q44.mongodb.net/noteApp?appName=Cluster0`
 
 mongoose.set('strictQuery',false)
-
-mongoose.connect(url, { family: 4 })
+mongoose.connect(uri, { family: 4 })
 
 const noteSchema = new mongoose.Schema({
   content: String,

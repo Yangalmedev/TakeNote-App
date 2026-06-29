@@ -1,9 +1,12 @@
+// THIS FILE IS FOR THE LIVE DEPLOYEMENT TO INTERNET
+
+require('dotenv').config()
 const { log } = require('console')
 const express = require('express')
-const app = express()
 const morgan = require('morgan')
 const mongoose = require('mongoose')
 const Note = require('./models/note')
+const app = express()
 
 // Define a custom token to capture POST body data
 morgan.token('body', (req, res) => {
@@ -17,10 +20,10 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 app.use(express.static('dist'))
 
 const password = process.argv[2]
-const url = `mongodb+srv://yangalmedev:${password}@cluster0.yte5q44.mongodb.net/noteApp?appName=Cluster0`
+const MONGODB_URI = process.env.MONGODB_URI
 
 mongoose.set('strictQuery',false)
-mongoose.connect(url, { family: 4 })
+mongoose.connect(MONGODB_URI, { family: 4 })
 
 const noteSchema = new mongoose.Schema({
   content: String,
@@ -83,8 +86,7 @@ app.delete('/api/notes/:id', (request, response) => {
   response.status(204).end()
 })
 
-// Binds the http server assigned to the app variable, to listen to HTTP requests sent to port 3001
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT // rads from .env
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
