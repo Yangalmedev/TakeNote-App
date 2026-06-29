@@ -2,6 +2,7 @@ const { log } = require('console')
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
+const mongoose = require('mongoose')
 
 // Define a custom token to capture POST body data
 morgan.token('body', (req, res) => {
@@ -14,17 +15,25 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 // Security & Assets
 app.use(express.static('dist'))
 
-let notes = [
-  { id: '1', content: 'HTML is easy', important: true },
-  { id: '2', content: 'Browser can execute only JavaScript', important: false},
-  { id: '3', content: 'GET and POST are the most important methods of HTTP protocol', important: true },
-  { id: '4', content: 'My name is Althea', important: true }
-]
+const password = process.argv[2]
+const url = `mongodb+srv://yangalmedev:${password}@cluster0.yte5q44.mongodb.net/noteApp?appName=Cluster0`
+
+mongoose.set('strictQuery',false)
+mongoose.connect(url, { family: 4 })
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+})
+
+const Note = mongoose.model('Note', noteSchema)
 
 app.use(express.json())  // Activates a built-in Express middleware called a JSON parser.
 
 app.get('/api/notes', (request, response) => {
-  response.json(notes)
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
 })
 
 app.get('/api/notes/:id', (request, response) => {
