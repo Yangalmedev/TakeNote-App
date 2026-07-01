@@ -30,8 +30,6 @@ const noteSchema = new mongoose.Schema({
   important: Boolean,
 })
 
-const Note = mongoose.model('Note', noteSchema)
-
 app.use(express.json())  // Activates a built-in Express middleware called a JSON parser.
 
 app.get('/api/notes', (request, response) => {
@@ -41,9 +39,18 @@ app.get('/api/notes', (request, response) => {
 })
 
 app.get('/api/notes/:id', (request, response) => {
-  Note.findById(request.params.id).then(note => {
-    response.json(note)
-  })
+  Note.findById(request.params.id)
+    .then(note => {
+      if (note){
+        response.json(note)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => {
+      log(error)
+      response.status(400).send({ error: 'malformatted id' })
+    })
 })
 
 const generateId = () => {
