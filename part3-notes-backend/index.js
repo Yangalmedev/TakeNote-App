@@ -9,6 +9,14 @@ const Note = require('./models/note')
 const note = require('./models/note')
 const app = express()
 
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
+
 // Define a custom token to capture POST body data
 morgan.token('body', (req, res) => {
   return req.method === 'POST' ? JSON.stringify(req.body) : ''
@@ -87,6 +95,26 @@ app.delete('/api/notes/:id', (request, response, next) => {
   Note.findByIdAndDelete(request.params.id)
     .then(result => {
       response.status(404).end()
+    })
+    .catch(error => next(error))
+})
+
+app.put('/api/notes/:id', (request, response, next) => {
+  const { content, important } = request.body
+
+  Note.findById(request.params.id)       // first promise
+    .then(note => {
+      if (!note) {
+        return response.status(404).end()  // not found, stop here
+      }
+
+      note.content = content               // update fields
+      note.important = important
+
+      return note.save()                   // second promise (nested)
+        .then(updatedNote => {
+          response.json(updatedNote)       // send updated note back
+        })
     })
     .catch(error => next(error))
 })
