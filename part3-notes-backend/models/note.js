@@ -14,6 +14,7 @@ mongoose.connect(url, { family: 4 })
     console.log('error connecting to MongoDB:', error.message)
   })
 
+  // Validation function for notes before storing them to DB
 const noteSchema = new mongoose.Schema({
   content: String,
   important: Boolean,

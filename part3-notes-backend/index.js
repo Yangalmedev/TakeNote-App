@@ -1,12 +1,12 @@
-// THIS FILE IS FOR THE LIVE DEPLOYEMENT TO INTERNET
 
 require('dotenv').config()
 const { log } = require('console')
 const express = require('express')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
+
 const Note = require('./models/note')
-const note = require('./models/note')
+const { request } = require('http')
 const app = express()
 
 const requestLogger = (request, response, next) => {
@@ -21,24 +21,11 @@ const requestLogger = (request, response, next) => {
 morgan.token('body', (req, res) => {
   return req.method === 'POST' ? JSON.stringify(req.body) : ''
 })
-
 // Use the tiny configuration and append the custom body token
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 // Security & Assets
 app.use(express.static('dist'))
-
-const password = process.argv[2]
-const MONGODB_URI = process.env.MONGODB_URI
-
-mongoose.set('strictQuery',false)
-mongoose.connect(MONGODB_URI, { family: 4 })
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
-})
-
 app.use(express.json())  // Activates a built-in Express middleware called a JSON parser.
 
 app.get('/api/notes', (request, response) => {
@@ -59,16 +46,16 @@ app.get('/api/notes/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-const generateId = () => {
+/* const generateId = () => {
   const maxId =
     notes.length > 0 ? Math.max(...notes.map((n) => Number(n.id))) : 0
   return String(maxId + 1)
-}
-app.post('/api/notes/', (request, response) => {
+} */
+
+app.post('/api/notes/', (request, response, next) => {
   const body = request.body
 
   if (!body.content){
-    // Calling return is crucial because otherwise the code will execute to the very end and the malformed note gets saved to the application.
     return response.status(400).json({
       error: 'content missing'
     })
@@ -78,17 +65,16 @@ app.post('/api/notes/', (request, response) => {
   const note = new Note({
     content: body.content,
     important: body.important || false,
-    id: generateId()
   })
 
-  notes.concat(note)
-  log(note)
-  response.json(note)
-  log('Request Headers: ', request.headers);
+  log('Request Headers: ', request.headers );
 
-  note.save().then(savedNote => {
-    response.json(savedNote)
-  })
+  note.save()
+    .then(savedNote => {
+      log(`New Note added: ${JSON.stringify(savedNote)}`)
+      response.status(201).json(savedNote)
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/notes/:id', (request, response, next) => {
